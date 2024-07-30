@@ -7,6 +7,28 @@ defmodule Clothingstore.Items do
   alias Clothingstore.Repo
 
   alias Clothingstore.Items.Item
+  alias Clothingstore.Tags.Tag
+  alias Clothingstore.Items.ItemsTags
+
+
+  @doc """
+  Returns the list of items with tags.
+
+  ## Examples
+
+      iex> list_items_with_tags()
+      [%Item{}, ...]
+
+  """
+  def list_items_with_tags do
+    query =
+      from i in Item,
+        join: it in ItemsTags, on: it.item_id == i.id,
+        join: t in Tag, on: t.id == it.tag_id,
+        preload: [tags: t]
+
+    Repo.all(query)
+  end
 
   @doc """
   Returns the list of items.
@@ -87,6 +109,29 @@ defmodule Clothingstore.Items do
   """
   def delete_item(%Item{} = item) do
     Repo.delete(item)
+  end
+
+  @doc """
+  Deletes an item by ID.
+
+  ## Examples
+
+      iex> delete_item(1)
+      :ok
+
+      iex> delete_item(2)
+      {:error, "Unable to delete item"}
+
+  """
+  def delete_item_by_id(id) do
+    case Repo.get(Item, id) do
+      nil -> {:error, "Item not found"}
+      item ->
+        case Repo.delete(item) do
+          {:ok, _} -> {:ok, "Deleted successfully"}
+          {:error, _} -> {:error, "Unable to delete item"}
+        end
+    end
   end
 
   @doc """

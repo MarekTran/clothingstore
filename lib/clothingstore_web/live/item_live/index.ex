@@ -2,7 +2,7 @@ defmodule ClothingstoreWeb.ItemLive.Index do
   use ClothingstoreWeb, :live_view
 
   alias Clothingstore.Items
-  alias Clothingstore.Tags
+  # alias Clothingstore.Tags
   # alias Clothingstore.Items.Item
 
   def mount(_params, _session, socket) do
@@ -11,7 +11,7 @@ defmodule ClothingstoreWeb.ItemLive.Index do
 
     socket =
       socket
-      |> assign(:items, Clothingstore.Items.list_items())
+      |> assign(:items, Clothingstore.Items.list_items_with_tags())
       |> assign(:form, to_form(changeset))
       |> assign(:formstate, to_form(changeset))
       |> assign(:uploaded_files, [])
@@ -68,5 +68,27 @@ defmodule ClothingstoreWeb.ItemLive.Index do
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :photograph, ref)}
+  end
+
+  def handle_event("delete_item", %{"id" => id}, socket) do
+    IO.puts("Hit Delete by id")
+    case Items.delete_item_by_id(id) do
+      {:ok, _} ->
+        IO.puts("Removing #{id} from socket assigns")
+        old_length = length(socket.assigns.items)
+        IO.puts("Old length: #{old_length}")
+        items = Enum.reject(socket.assigns.items, fn item ->
+          item.id == String.to_integer(id) end)
+        IO.puts("New length: #{length(items)}")
+
+        # Use update/3 function to update the :items assign
+        socket = update(socket, :items, fn _items -> items end)
+        IO.inspect(socket.assigns.items, label: "Updated socket assigns items")
+
+        {:noreply, socket |> put_flash(:info, "Item deleted")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Failed to delete item: #{reason}")}
+    end
   end
 end
