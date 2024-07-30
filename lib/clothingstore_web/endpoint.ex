@@ -23,7 +23,8 @@ defmodule ClothingstoreWeb.Endpoint do
     at: "/",
     from: :clothingstore,
     gzip: false,
-    only: ClothingstoreWeb.static_paths()
+    # only: ClothingstoreWeb.static_paths()
+    only: ~w(assets fonts images favicon.ico uploads robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

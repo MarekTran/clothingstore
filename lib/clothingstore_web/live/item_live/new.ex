@@ -1,5 +1,4 @@
 defmodule ClothingstoreWeb.ItemLive.New do
-  alias Ecto.UUID
   use ClothingstoreWeb, :live_view
 
   alias Clothingstore.Items
@@ -16,26 +15,6 @@ defmodule ClothingstoreWeb.ItemLive.New do
     {:ok, socket}
   end
 
-  # def handle_event("submit", %{"item" => item_params}, socket) do
-  #   # Print handle hit
-  #   IO.puts("Hit handle_event")
-  #   IO.puts(item_params)
-  #   case Items.create_item(item_params) do
-  #     {:ok, _item} ->
-  #       socket = socket
-  #       |> put_flash(:info, "Item created successfully.")
-  #       |> push_navigate(to: ~p"/items")
-
-  #       {:noreply, socket}
-
-  #     {:error, changeset} ->
-  #       socket = socket
-  #       |> assign(:form, to_form(changeset))
-
-  #       {:noreply, socket}
-  #   end
-  # end
-
   def handle_event("submit", %{"item" => item_params}, socket) do
     # Handle file upload
     # TODO: Assert 1 file, postpone copy until after db entry
@@ -49,7 +28,7 @@ defmodule ClothingstoreWeb.ItemLive.New do
         IO.puts("Copying file to #{dest}")
         File.cp!(path, dest)
 
-        {:ok, "/uploads/#{original_file_name}"}
+        {:ok, "uploads/#{original_file_name}"}
       end)
 
     # Update socket with uploaded file
