@@ -1,4 +1,4 @@
-defmodule Clothingstore.Tag do
+defmodule Clothingstore.Tags.Tag do
   use Ecto.Schema
   import Ecto.Changeset
 

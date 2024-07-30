@@ -8,7 +8,7 @@ defmodule Clothingstore.Items.Item do
     field :img, :string
     field :price, :decimal
     field :stock, :integer
-    many_to_many :tags, Clothingstore.Tag, join_through: "items_tags"
+    many_to_many :tags, Clothingstore.Tags.Tag, join_through: "items_tags"
 
     timestamps(type: :utc_datetime)
   end

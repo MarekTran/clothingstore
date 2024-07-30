@@ -2,6 +2,7 @@ defmodule ClothingstoreWeb.ItemLive.Index do
   use ClothingstoreWeb, :live_view
 
   alias Clothingstore.Items
+  alias Clothingstore.Tags
   # alias Clothingstore.Items.Item
 
   def mount(_params, _session, socket) do
@@ -17,64 +18,6 @@ defmodule ClothingstoreWeb.ItemLive.Index do
       |> allow_upload(:photograph, accept: ~w(.jpg .jpeg .png), max_entries: 1)
 
     {:ok, socket}
-  end
-
-  # Populate the database with sample data
-  def get_data do
-    url = "https://api.escuelajs.co/api/v1/products"
-
-    case HTTPoison.get(url) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        case Jason.decode(body) do
-          {:ok, data} ->
-            {:ok, data}
-          {:error, error} ->
-            {:error, error}
-        end
-
-      {:ok, %HTTPoison.Response{status_code: status_code}} when status_code != 200 ->
-        {:error, "Request failed with status code: #{status_code}"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, reason}
-    end
-  end
-
-  def init_data do
-    case get_data() do
-      {:ok, data} ->
-
-        data = Enum.filter(data, fn item ->
-          item["category"]["name"] == "Clothes"
-        end)
-
-        sample_data = Enum.take(data, 10)
-        clothes_with_index = Enum.with_index(sample_data)
-
-        Enum.each(clothes_with_index, fn {item, index} ->
-          category = item["category"]["name"]
-          first_image_url = List.first(item["images"])
-          title = item["title"]
-          price = item["price"]
-          description = item["description"]
-
-          IO.puts("Stock: #{index}")
-          IO.puts("Category: #{category}")
-          IO.puts("First Image URL: #{first_image_url}")
-          IO.puts("Title: #{title}")
-          IO.puts("Price: #{price}")
-          IO.puts("Description: #{description}")
-          IO.puts("-------------------------------")
-        end)
-
-      {:error, error} ->
-        IO.puts("Error: #{error}")
-    end
-  end
-
-  def handle_event("populate", _params, socket) do
-    init_data()
-    {:noreply, socket}
   end
 
   def handle_event("submit", %{"item" => item_params}, socket) do
