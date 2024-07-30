@@ -14,7 +14,7 @@ defmodule Clothingstore.Items.Item do
   end
 
   @doc false
-  def changeset(item, attrs) do
+  def changeset(item, attrs \\ %{}) do
     item
     |> cast(attrs, [:title, :img, :description, :price, :stock])
     |> validate_required([:title, :img, :description, :price, :stock])
