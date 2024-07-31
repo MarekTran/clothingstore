@@ -23,15 +23,16 @@ defmodule ClothingstoreWeb.ItemLive.Index do
   end
 
   def price_filter(items, from, to) do
+    # +-1 is a terrible hack for inclusive comparison
     case {from, to} do
       {"" , ""} -> items
       {from, ""} -> Enum.filter(items, fn item ->
-        Decimal.compare(item.price, String.to_integer(from)) == :gt
+        Decimal.compare(item.price, String.to_integer(from) - 1) == :gt
       end)
       {"", to} -> Enum.filter(items, fn item ->
-        Decimal.compare(item.price, String.to_integer(to)) == :lt
+        Decimal.compare(item.price, String.to_integer(to) + 1) == :lt
       end)
-      {from, to} -> Enum.filter(items, fn item -> Decimal.compare(item.price, String.to_integer(from)) == :gt and Decimal.compare(item.price, String.to_integer(to)) == :lt end)
+      {from, to} -> Enum.filter(items, fn item -> Decimal.compare(item.price, String.to_integer(from) - 1) == :gt and Decimal.compare(item.price, String.to_integer(to) + 1) == :lt end)
     end
   end
 
