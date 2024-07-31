@@ -181,7 +181,7 @@ defmodule ClothingstoreWeb.ItemLive.Index do
     case Tags.delete_tag_by_id(id) do
       {:ok, _} ->
         IO.puts("Removing #{id} from socket assigns")
-        old_length = length(socket.assigns.alltags)
+        # old_length = length(socket.assigns.alltags)
         tags = Enum.reject(socket.assigns.alltags, fn tag -> tag.id == String.to_integer(id) end)
 
         # Use update/3 function to update the :items assign
