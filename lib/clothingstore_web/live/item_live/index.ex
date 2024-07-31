@@ -2,15 +2,17 @@ defmodule ClothingstoreWeb.ItemLive.Index do
   use ClothingstoreWeb, :live_view
 
   alias Clothingstore.Items
-  # alias Clothingstore.Tags
+  alias Clothingstore.Tags
   # alias Clothingstore.Items.Item
 
   def mount(_params, _session, socket) do
-    # user_id = socket.assigns.current_user.id # Unused
     changeset = Items.Item.changeset(%Items.Item{})
+    filter_fields = %{"price_from" => "", "price_to" => "", "tag" => "", "stock" => ""}
 
     socket =
       socket
+      |> assign(:filter_params, to_form(filter_fields))
+      |> assign(:alltags, Clothingstore.Tags.list_tags())
       |> assign(:items, Clothingstore.Items.list_items_with_tags())
       |> assign(:form, to_form(changeset))
       |> assign(:formstate, to_form(changeset))
@@ -18,6 +20,59 @@ defmodule ClothingstoreWeb.ItemLive.Index do
       |> allow_upload(:photograph, accept: ~w(.jpg .jpeg .png), max_entries: 1)
 
     {:ok, socket}
+  end
+
+  def price_filter(items, from, to) do
+    case {from, to} do
+      {"" , ""} -> items
+      {from, ""} -> Enum.filter(items, fn item ->
+        Decimal.compare(item.price, String.to_integer(from)) == :gt
+      end)
+      {"", to} -> Enum.filter(items, fn item ->
+        Decimal.compare(item.price, String.to_integer(to)) == :lt
+      end)
+      {from, to} -> Enum.filter(items, fn item -> Decimal.compare(item.price, String.to_integer(from)) == :gt and Decimal.compare(item.price, String.to_integer(to)) == :lt end)
+    end
+  end
+
+
+  def stock_filter(items, in_stock_only) do
+    case in_stock_only do
+      "true" -> Enum.filter(items, fn item -> item.stock > 0 end)
+      _ -> items
+    end
+  end
+
+  def tag_filter(items, tag_id) do
+    case tag_id do
+      "" -> items
+      _ -> Enum.filter(items, fn item -> Enum.any?(item.tags, fn tag -> tag.id == String.to_integer(tag_id) end) end)
+    end
+  end
+
+  def handle_event("clear_filter", _params, socket) do
+    socket = socket
+    # |> assign(:items, Clothingstore.Items.list_items_with_tags())
+    |> update(:items, fn _ -> Clothingstore.Items.list_items_with_tags() end)
+    # |> assign(:filter_params, to_form(filter_fields))
+    |> update(:filter_params, fn _ -> to_form(%{"price_from" => "", "price_to" => "", "tag" => "", "stock" => ""}) end)
+    |> put_flash(:info, "Filter cleared!")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("set_filter", filter_params, socket) do
+    IO.inspect(filter_params, label: "Filter params")
+    # Get items
+    items = Clothingstore.Items.list_items_with_tags()
+    filtered_items = items
+    |> price_filter(filter_params["price_from"], filter_params["price_to"])
+    |> stock_filter(filter_params["stock"])
+    |> tag_filter(filter_params["tag"])
+
+    # Update socket items assign
+    socket = socket |> update(:items, fn _ -> filtered_items end) |> assign(:filter_params, to_form(filter_params)) |> put_flash(:info, "Filter set!")
+    {:noreply, socket}
   end
 
   def handle_event("submit", %{"item" => item_params}, socket) do
