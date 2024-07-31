@@ -9,6 +9,12 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
+# Postgres
+
+To start the postgres server:
+  * run `docker compose -f db/docker-compose.yml up -d`
+Or run natively with username and password as `postgres`.
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/

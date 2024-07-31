@@ -18,5 +18,6 @@ defmodule Clothingstore.Items.Item do
     item
     |> cast(attrs, [:title, :img, :description, :price, :stock])
     |> validate_required([:title, :img, :description, :price, :stock])
+    # |> put_assoc(:tags, attrs[:tags] || [])
   end
 end

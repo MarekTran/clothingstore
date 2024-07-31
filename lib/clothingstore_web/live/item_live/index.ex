@@ -6,7 +6,9 @@ defmodule ClothingstoreWeb.ItemLive.Index do
   # alias Clothingstore.Items.Item
 
   def mount(_params, _session, socket) do
-    changeset = Items.Item.changeset(%Items.Item{})
+    # changeset = Items.Item.changeset(%Items.Item{})
+    # IO.inspect(Items.Item.changeset(%Items.Item{}))
+    create_form_fields = %{"title" => "", "description" => "", "price" => "", "stock" => "", "tag_ids" => []}
     filter_fields = %{"price_from" => "", "price_to" => "", "tag" => "", "stock" => ""}
 
     socket =
@@ -14,8 +16,8 @@ defmodule ClothingstoreWeb.ItemLive.Index do
       |> assign(:filter_params, to_form(filter_fields))
       |> assign(:alltags, Clothingstore.Tags.list_tags())
       |> assign(:items, Clothingstore.Items.list_items_with_tags())
-      |> assign(:form, to_form(changeset))
-      |> assign(:formstate, to_form(changeset))
+      |> assign(:form, to_form(create_form_fields))
+      # |> assign(:formstate, to_form(changeset))
       |> assign(:uploaded_files, [])
       |> allow_upload(:photograph, accept: ~w(.jpg .jpeg .png), max_entries: 1)
 
@@ -76,7 +78,9 @@ defmodule ClothingstoreWeb.ItemLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("submit", %{"item" => item_params}, socket) do
+
+
+  def handle_event("submit", item_form_params, socket) do
     # Handle file upload
     # TODO: Assert 1 file, postpone copy until after db entry
     uploaded_files =
@@ -98,8 +102,11 @@ defmodule ClothingstoreWeb.ItemLive.Index do
     end)
 
     # Handle db entry, need to add img field
-    item_params = Map.put(item_params, "img", hd(socket.assigns.uploaded_files))
-    case Items.create_item(item_params) do
+    item_form_params = Map.put(item_form_params, "img", hd(socket.assigns.uploaded_files))
+
+    # Handle Tag db entry and association
+    IO.inspect(item_form_params, label: "Before create item")
+    case Items.create_item_with_tags(item_form_params) do
       {:ok, _item} ->
         socket = socket
         |> put_flash(:info, "Item created successfully.")
@@ -116,10 +123,10 @@ defmodule ClothingstoreWeb.ItemLive.Index do
     end
   end
 
-  def handle_event("validate", %{"item" => item_params}, socket) do
+  def handle_event("validate", item_form_params, socket) do
     IO.puts("Hit validate")
-    changeset = Items.Item.changeset(%Items.Item{}, item_params)
-    {:noreply, assign(socket, :form, to_form(changeset))}
+    # changeset = Items.Item.changeset(%Items.Item{}, item_params)
+    {:noreply, assign(socket, :form, to_form(item_form_params))}
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do

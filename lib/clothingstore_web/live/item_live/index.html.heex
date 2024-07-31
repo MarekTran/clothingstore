@@ -86,34 +86,38 @@
 
 <.form for={@form} phx-submit="submit" phx-change="validate">
   <.input
+    required={true}
     field={@form[:title]}
     type="text"
     label="Title"
   />
   <.input
+    required={true}
     field={@form[:description]}
     type="text"
     label="Description"
   />
   <.input  
+    required={true}
     field={@form[:price]}
     type="number"
     step="0.01"
     label="Price"
   />
-  <.input  
+  <.input
+    required={true}  
     field={@form[:stock]}
     type="number"
     label="Stock"
   />
-  <%!-- <.select
+  <.input
+    required={true}
+    type="select"
     field={@form[:tag_ids]}
     label="Tags"
     multiple={true}
-    options={@tags}
-    option_label={&(&1.name)}
-    option_value={&(&1.id)}
-  /> --%>
+    options={Enum.map(@alltags, fn tag -> {tag.name, tag.id} end)}
+  />
 
   <.live_file_input upload={@uploads.photograph} />
   <%= for entry <- @uploads.photograph.entries do %>

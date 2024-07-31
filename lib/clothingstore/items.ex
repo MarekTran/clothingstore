@@ -11,6 +11,62 @@ defmodule Clothingstore.Items do
   alias Clothingstore.Items.ItemsTags
 
 
+
+  def add_tag_to_item(item_id, tag_id) do
+    %ItemsTags{}
+    |> ItemsTags.changeset(%{item_id: item_id, tag_id: tag_id})
+    |> Repo.insert()
+  end
+
+
+  def remove_tag_from_item(item_id, tag_id) do
+    query = from(it in ItemsTags, where: it.item_id == ^item_id and it.tag_id == ^tag_id)
+    Repo.delete_all(query)
+  end
+
+  def create_item_with_tags(attrs \\ %{}) do
+    IO.inspect(attrs, label: "Received attributes")
+
+    tag_ids = Map.get(attrs, "tag_ids", [])
+    IO.inspect(tag_ids, label: "Tag IDs before processing")
+
+    tag_ids =
+      if is_list(tag_ids) do
+        Enum.map(tag_ids, &String.to_integer/1)
+      else
+        []
+      end
+    IO.inspect(tag_ids, label: "Tag IDs after conversion to integers")
+
+    tags = Repo.all(from t in Tag, where: t.id in ^tag_ids)
+    IO.inspect(tags, label: "Fetched Tags")
+
+    item_changeset = Item.changeset(%Item{}, attrs)
+
+    Repo.transaction(fn ->
+      case Repo.insert(item_changeset) do
+        {:ok, item} ->
+          tag_changesets = Enum.map(tag_ids, fn tag_id ->
+            %ItemsTags{}
+            |> ItemsTags.changeset(%{item_id: item.id, tag_id: tag_id})
+          end)
+
+          results = Enum.map(tag_changesets, &Repo.insert(&1))
+
+          if Enum.all?(results, fn result -> match?({:ok, _}, result) end) do
+            {:ok, item}
+          else
+            Repo.rollback("Failed to insert tag associations")
+          end
+
+        {:error, changeset} ->
+          IO.inspect(changeset.errors, label: "Failed to create item")
+          Repo.rollback(changeset)
+      end
+    end)
+  end
+
+
   @doc """
   Returns the list of items with tags.
 
