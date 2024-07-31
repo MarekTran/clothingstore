@@ -24,3 +24,7 @@ Or run natively with username and password as `postgres`.
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
+
+## Developed with
+`Erlang/OTP 26 [erts-14.2.5.2] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit:ns]`
+`Elixir 1.14.0 (compiled with Erlang/OTP 24)`
