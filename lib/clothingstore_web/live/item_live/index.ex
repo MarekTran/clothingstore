@@ -3,6 +3,7 @@ defmodule ClothingstoreWeb.ItemLive.Index do
 
   alias Clothingstore.Items
   alias Clothingstore.Tags
+  # alias Clothingstore.Tags.Tag
   # alias Clothingstore.Items.Item
 
   def mount(_params, _session, socket) do
@@ -10,9 +11,11 @@ defmodule ClothingstoreWeb.ItemLive.Index do
     # IO.inspect(Items.Item.changeset(%Items.Item{}))
     create_form_fields = %{"title" => "", "description" => "", "price" => "", "stock" => "", "tag_ids" => []}
     filter_fields = %{"price_from" => "", "price_to" => "", "tag" => "", "stock" => ""}
+    tag_changeset = Tags.Tag.changeset(%Tags.Tag{})
 
     socket =
       socket
+      |> assign(:tag_form, to_form(tag_changeset))
       |> assign(:filter_params, to_form(filter_fields))
       |> assign(:alltags, Clothingstore.Tags.list_tags())
       |> assign(:items, Clothingstore.Items.list_items_with_tags())
@@ -152,6 +155,43 @@ defmodule ClothingstoreWeb.ItemLive.Index do
 
       {:error, reason} ->
         {:noreply, put_flash(socket, :error, "Failed to delete item: #{reason}")}
+    end
+  end
+
+  def handle_event("submit_tag", %{"tag" => tag_params}, socket) do
+    IO.inspect(tag_params, label: "Tag params")
+    case Tags.create_tag(tag_params) do
+      {:ok, _tag} ->
+        socket = socket
+        |> put_flash(:info, "Tag created successfully.")
+        |> push_navigate(to: ~p"/items")
+
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        socket = socket
+        |> put_flash(:error, "Tag creation failed.")
+        |> assign(:tag_form, to_form(changeset))
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("delete_tag", %{"id" => id}, socket) do
+    case Tags.delete_tag_by_id(id) do
+      {:ok, _} ->
+        IO.puts("Removing #{id} from socket assigns")
+        old_length = length(socket.assigns.alltags)
+        tags = Enum.reject(socket.assigns.alltags, fn tag -> tag.id == String.to_integer(id) end)
+
+        # Use update/3 function to update the :items assign
+        socket = update(socket, :alltags, fn _tags -> tags end)
+        IO.inspect(socket.assigns.alltags, label: "Updated socket assigns tags")
+
+        {:noreply, socket |> put_flash(:info, "Tag deleted")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Failed to delete tag: #{reason}")}
     end
   end
 end

@@ -8,6 +8,11 @@ defmodule Clothingstore.Tags do
 
   alias Clothingstore.Tags.Tag
 
+  def delete_tag_by_id(tag_id) do
+    tag = Repo.get(Tag, tag_id)
+    Repo.delete(tag)
+  end
+
   @doc """
   Returns the list of tags.
 
