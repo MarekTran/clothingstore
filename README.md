@@ -1,5 +1,14 @@
 # Clothingstore
 
+Installation of Elixir and Erlang can be done via install scripts:
+```
+curl -fsSO https://elixir-lang.org/install.sh
+sh install.sh elixir@1.18.2 otp@27.1.2
+installs_dir=$HOME/.elixir-install/installs
+export PATH=$installs_dir/otp/27.1.2/bin:$PATH
+export PATH=$installs_dir/elixir/1.18.2-otp-27/bin:$PATH
+```
+
 To start your Phoenix server:
 
   * Run `mix setup` to install and setup dependencies
@@ -16,6 +25,9 @@ Seed the database with with `mix run priv/repo/seeds.exs`
 To start the postgres server:
   * run `docker compose -f db/docker-compose.yml up -d`
 Or run natively with username and password as `postgres`.
+
+## Example:
+<img src="example.jpg" alt="alt text" width="80%">
 
 ## Learn more
 
